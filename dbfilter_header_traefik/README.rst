@@ -89,8 +89,8 @@ Mantenedores
 ------------
 
 Este módulo é mantido pela `Agência Impulse <https://github.com/agenciaimpulse>`_.
-.. image:: https://agenciaimpulse.com.br/logo-impulse
+.. image:: https://agenciaimpulse.com.br/web/binary/company_logo
 :alt: Agência Impulse
 :target: https://agenciaimpulse.com.br
 
-Este módulo faz parte do projeto `agenciaimpulse/odoo-impulse <https://github.com/agenciaimpulse/odoo-impulse/dbfilter_header_traefik>`_ no GitHub.
+Este módulo faz parte do projeto `agenciaimpulse/odoo-impulse <https://github.com/agenciaimpulse/odoo-impulse/tree/18.0/dbfilter_header_traefik>`_ no GitHub.
