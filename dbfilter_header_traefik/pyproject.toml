@@ -1,0 +1,4 @@
+# dbfilter_header_traefik/pyproject.toml
+[build-system]
+requires = ["whool"]
+build-backend = "whool.buildapi"
