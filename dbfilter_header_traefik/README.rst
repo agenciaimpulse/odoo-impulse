@@ -50,25 +50,35 @@ Para instalar este módulo, siga os passos abaixo:
 Configuração do Traefik
 =======================
 
-Este módulo espera que o Traefik envie o cabeçalho `X-Odoo-dbfilter` contendo o **nome do host completo** (ex: `seudominio.com.br` ou `www.seudominio.com.br`). O módulo Odoo irá processar este valor para encontrar o banco de dados correspondente.
+Este módulo não requer configurações específicas de cabeçalhos personalizados no Traefik para o filtro de banco de dados. Ele lê diretamente o cabeçalho padrão ``Host`` da requisição HTTP (ex: ``seudominio.com.br`` ou ``www.seudominio.com.br``) para determinar o nome do banco de dados.
 
-Para o Traefik, utilize a seguinte configuração no seu middleware de cabeçalhos (`odoo[VERSÃO]-headers` no seu exemplo `odoo[VERSÃO]_dynamic_conf.yml`):
+Você deve garantir que o Traefik esteja configurado para rotear o tráfego para seu serviço Odoo e que os cabeçalhos essenciais para ambientes de proxy estejam presentes. Por exemplo, é fundamental que o Traefik envie o cabeçalho ``X-Forwarded-Proto: "https"`` para informar ao Odoo que a conexão original do cliente é segura (HTTPS), mesmo que a comunicação entre o Traefik e o Odoo seja via HTTP.
 
-```yaml
-# Exemplo de configuração no seu /opt/stacks/portainer/config/odoo[VERSÃO]_dynamic_conf.yml
-http:
-  # ... (seus routers e outros middlewares) ...
-  middlewares:
-    odoo[VERSÃO]-headers:
-      headers:
-        # ... outras configurações de cabeçalho (STS, X-Forwarded-Proto, Cache-Control) ...
-        customRequestHeaders:
-          X-Forwarded-Proto: "https"
-          # Envia o nome do host exato para o Odoo.
-          # O módulo 'dbfilter_header_traefik' fará a formatação necessária.
-          X-Odoo-dbfilter: "{Host}"
-        # ... outras configurações de cabeçalho ...
-```
+Um exemplo de configuração de middleware de cabeçalhos no Traefik (geralmente em um arquivo de configuração dinâmica como ``odoo[VERSÃO]_dynamic_conf.yml``):
+
+.. code:: yaml
+
+   # Exemplo de configuração no seu /opt/stacks/portainer/config/odoo[VERSÃO]_dynamic_conf.yml
+   http:
+     # ... (seus routers e outros middlewares) ...
+
+     middlewares:
+       odoo[VERSÃO]-headers:
+         headers:
+           # Configurações de segurança e cabeçalhos padrão
+           stsSeconds: 31536000
+           stsIncludeSubdomains: true
+           stsPreload: true
+           customRequestHeaders:
+             # Informa ao Odoo que a conexão original do cliente é HTTPS.
+             # Essencial para que o Odoo gere URLs corretamente (ex: redirecionamentos para HTTPS).
+             X-Forwarded-Proto: "https"
+           customResponseHeaders:
+             # Define cache para assets estáticos no navegador e proxies.
+             Cache-Control: "public, max-age=31536000"
+
+
+**Observação:** O cabeçalho ``Host`` é automaticamente enviado pelo Traefik ao Odoo. O módulo ``dbfilter_header_traefik`` processará este cabeçalho padrão para filtrar o banco de dados sem a necessidade de uma configuração ``X-Odoo-dbfilter`` explícita no Traefik.
 
 Uso
 ===
