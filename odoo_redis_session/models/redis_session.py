@@ -69,13 +69,13 @@ def _read_password(config: dict[str, Any]) -> str | None:
     if password:
         return password
 
-    password_file = os.environ.get("REDIS_PASSWORD_FILE")
+    password_file = os.environ.get("REDIS_PASSWORD_FILE") or config.get("password_file")
     if password_file:
         try:
             with open(password_file, encoding="utf-8") as secret_file:
                 password = secret_file.read().strip()
         except OSError:
-            _logger.warning("Unable to read the Redis password file")
+            _logger.warning("Unable to read the Redis password file: %s", password_file)
         else:
             if password:
                 return password
@@ -98,7 +98,13 @@ class RedisSessionConfig:
 
     @classmethod
     def from_odoo_config(cls) -> "RedisSessionConfig":
-        misc = tools.config.misc.get("odoo_redis_session", {})
+        if hasattr(tools.config, 'get_misc'):
+            misc = tools.config.get_misc("odoo_redis_session", {})
+        elif hasattr(tools.config, 'options'):
+            misc = tools.config.options.get("odoo_redis_session", {})
+        else:
+            misc = getattr(tools.config, 'misc', {}).get("odoo_redis_session", {})
+
         ignored_urls = list(DEFAULT_IGNORED_URLS)
         configured_urls = _environment_or_config(
             "ODOO_SESSION_REDIS_TIMEOUT_IGNORED_URLS", "ignored_urls", misc, ""
