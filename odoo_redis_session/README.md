@@ -10,6 +10,22 @@ Install the Python dependency in the Odoo environment:
 pip install redis
 ```
 
+To install directly in the running container:
+
+```bash
+docker exec -u root <container-name> pip3 install --no-cache-dir redis
+
+docker restart <container-name>
+```
+
+Check:
+
+```bash
+docker exec <container-name> python3 -c "import redis; print(redis.__version__)"   
+```
+
+**This is temporary:** the installation will be lost if the container is recreated. To persist it across future deployments, the image must be derived using a `Dockerfile` that runs `pip3 install redis`.
+
 Add `odoo_redis_session` to Odoo's `server_wide_modules`. The addon must be loaded when the server starts; installing it in a database is not required for the session store to be active.
 
 ## Environment
